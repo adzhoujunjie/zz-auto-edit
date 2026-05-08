@@ -1,11 +1,11 @@
-import { access, stat } from 'node:fs/promises';
+import { access, stat, readFile } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
+import { getCaptionPath, loadConfig } from './config-utils.js';
 
 const execFileAsync = promisify(execFile);
-
-const requiredFiles = [
+const baseRequiredFiles = [
   'edit.config.json',
   'captions/sample.srt',
   'captions/parsed-captions.json',
@@ -28,18 +28,37 @@ async function commandVersion(command, args) {
   }
 }
 
+function validateTimedElements(html) {
+  const warnings = [];
+  const tagPattern = /<([a-z0-9-]+)\b([^>]*)>/gi;
+  for (const match of html.matchAll(tagPattern)) {
+    const [, tagName, attrs] = match;
+    const timed = /\bdata-start=/.test(attrs) || /\bdata-duration=/.test(attrs);
+    if (!timed) continue;
+    const isVideoOrAudio = ['video', 'audio'].includes(tagName.toLowerCase());
+    if (!isVideoOrAudio && !/\bclass=["'][^"']*\bclip\b/.test(attrs)) {
+      warnings.push(`timed element <${tagName}> 缺少 class="clip"：${match[0].slice(0, 120)}...`);
+    }
+  }
+  return warnings;
+}
+
 async function main() {
   let errors = 0;
   let warnings = 0;
-  const config = JSON.parse(await (await import('node:fs/promises')).readFile('edit.config.json', 'utf8'));
+  const config = await loadConfig();
 
   for (const dir of requiredDirs) {
     if (await exists(dir) && (await stat(dir)).isDirectory()) console.log(`✓ 目录存在：${dir}`);
     else { console.error(`✗ 缺少目录：${dir}`); errors += 1; }
   }
 
-  for (const file of requiredFiles) {
+  const requiredFiles = [...baseRequiredFiles, getCaptionPath(config)];
+  if (config.mode === 'real') requiredFiles.push(config.rawVideoPath, config.videoMetadataPath);
+
+  for (const file of [...new Set(requiredFiles)]) {
     if (await exists(file) && (await stat(file)).isFile()) console.log(`✓ 文件存在：${file}`);
+    else if (config.mode === 'demo' && file === config.rawVideoPath) { console.warn(`⚠ demo 模式未找到真实视频素材：${file}（不影响 demo）`); warnings += 1; }
     else { console.error(`✗ 缺少文件：${file}`); errors += 1; }
   }
 
@@ -53,10 +72,23 @@ async function main() {
 
   const ffprobe = await commandVersion('ffprobe', ['-version']);
   if (ffprobe.ok) console.log(`✓ FFprobe 可用：${ffprobe.output}`);
+  else if (config.mode === 'real') { console.error(`✗ real 模式需要 FFprobe：${ffprobe.output}`); errors += 1; }
   else { console.warn(`⚠ FFprobe 不可用：${ffprobe.output}`); warnings += 1; }
 
-  if (await exists(config.rawVideoPath)) console.log(`✓ 已找到真实视频素材：${config.rawVideoPath}`);
-  else { console.warn(`⚠ 未找到 ${config.rawVideoPath}，demo 将使用 composition 内置占位画面。`); warnings += 1; }
+  if (config.mode === 'demo') {
+    if (await exists(config.rawVideoPath)) console.log(`✓ 已找到真实视频素材：${config.rawVideoPath}`);
+    else { console.warn(`⚠ 未找到 ${config.rawVideoPath}，demo 将使用 composition 内置占位画面。`); warnings += 1; }
+  }
+
+  const compositionHtml = await readFile('compositions/current.html', 'utf8');
+  const timedWarnings = validateTimedElements(compositionHtml);
+  if (timedWarnings.length === 0) console.log('✓ timed elements 均符合 class="clip" 规范（video/audio 由 HyperFrames 管理）。');
+  else {
+    for (const warning of timedWarnings) console.warn(`⚠ ${warning}`);
+    warnings += timedWarnings.length;
+  }
+  if (compositionHtml.includes('window.__timelines') && compositionHtml.includes('zz-auto-edit-version-001')) console.log('✓ composition 已注册 window.__timelines。');
+  else { console.error('✗ composition 缺少 window.__timelines 注册。'); errors += 1; }
 
   if (errors > 0) {
     console.error(`✗ 项目校验失败：${errors} 个错误，${warnings} 个警告。`);

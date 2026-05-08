@@ -1,109 +1,92 @@
-# zz-auto-edit：基于 HyperFrames 的自动剪辑 MVP
+# zz-auto-edit
 
-这是一个从 0 搭建的“自动剪辑工具”工程骨架。它的目标不是先做复杂 UI，而是先把一条短视频自动剪辑流程跑通：放入口播素材、放入带时间戳的中文字幕、写自然语言剪辑需求，然后生成可预览、可导出、可继续迭代的 HyperFrames composition。
+基于 HyperFrames 的自动剪辑 MVP。第一阶段已经跑通 demo 的字幕解析、剪辑计划、HTML composition、预览和导出骨架；第二阶段在不推翻重写的基础上，补齐 HyperFrames 规范性 warning 修复和真实视频素材接入能力。
 
-> 当前环境检查结果：Node.js 为 v24.15.0，满足 `>=22`；当前容器没有 FFmpeg；当前 npm registry 对 `hyperframes` 包返回 403，因此本环境里 `preview/render` 不能完成实际 HyperFrames 拉取与 MP4 导出。代码仍按 HyperFrames 官方 CLI 方式配置：`npx hyperframes preview .` 与 `npx hyperframes render -c compositions/current.html -o output/version-001.mp4`。
+## 当前能力
 
-## 1. 这个工具是干什么的
+- demo 模式：使用 `captions/sample.srt` 和内置占位画面生成 `version-001`。
+- real 模式：用户放入 `assets/raw/main.mp4` 和 `captions/main.srt` 后，自动探测视频信息、解析真实字幕、生成剪辑计划，并渲染到 `output/version-001.mp4`。
+- 保留版本化结构：`compositions/version-001.html`、`compositions/current.html`、`scripts/create-version.js`、`edit-notes/`、`changelog/`。
+- 真实素材和导出视频不提交 Git。
 
-它面向中文口播短视频，例如知识类、工具类、广告素材开头。你提供：
+## 环境要求
 
-1. 原始口播视频素材。
-2. `.srt` 中文字幕。
-3. 一段自然语言剪辑需求。
+- Node.js `>=22`
+- FFmpeg / ffprobe：real 模式探测视频和 render 导出需要
+- 可访问 HyperFrames CLI 的 npm 环境：`preview` / `render` 会通过 `npx hyperframes ...` 执行
 
-项目会先解析字幕，再生成基础剪辑计划，然后用 HyperFrames HTML composition 表达视频画面、字幕、大字、轻微镜头运动和占位叠加元素。
-
-## 2. 当前 MVP 能做到什么
-
-- 解析中文 SRT 字幕，输出结构化 JSON。
-- 根据字幕和配置生成 `captions/edit-plan.json`。
-- 提供 15 秒、1920x1080、16:9 的 HyperFrames HTML composition。
-- 没有真实视频时，自动使用画面占位区模拟口播人物。
-- 保留人物安全区，字幕和大字不会覆盖中间人物区域。
-- 提供每一版的 edit-notes 和 changelog。
-- 提供创建下一版的脚本，避免覆盖旧版本。
-- 提供可沉淀为自动剪辑风格规则的 Skill 文件。
-
-## 3. 现在还不能做到什么
-
-- 还没有接入真实 LLM 理解自然语言需求。
-- 还没有做复杂 UI 或批量处理。
-- 当前 composition 暂未动态读取 `edit-plan.json`，第一版先保持一个可渲染、可审阅的静态 HTML composition。
-- 当前环境缺少 FFmpeg，且 npm registry 拉取 HyperFrames CLI 受阻，所以本容器中不能完成 MP4 导出；在本机或 CI 中安装 FFmpeg 并能访问 npm 后即可验证。
-
-## 4. 项目目录结构说明
-
-```text
-.
-├── README.md
-├── package.json
-├── edit.config.json
-├── assets/                 # 原始视频、音频、图片素材；真实素材不提交 Git
-├── captions/               # SRT、解析后的字幕和剪辑计划
-├── prompts/                # 自然语言剪辑需求和下一轮反馈
-├── compositions/           # HyperFrames HTML composition
-├── scripts/                # 字幕解析、计划生成、校验、版本创建脚本
-├── edit-notes/             # 每版剪辑说明
-├── changelog/              # 每版变更记录
-├── output/                 # 导出 MP4；不提交 Git
-└── .agents/skills/         # 后续可复用的自动剪辑 Skill
-```
-
-补充说明：仓库根目录还包含 `index.html`，内容与 `compositions/current.html` 同步，用于兼容 HyperFrames 默认从项目根目录预览 `index.html` 的工作方式。
-
-## 5. 第一次怎么运行
-
-请先确认本机环境：
+检查命令：
 
 ```bash
 node -v
 ffmpeg -version
+ffprobe -version
 ```
 
-要求：
+## edit.config.json 关键字段
 
-- Node.js：`>=22`
-- FFmpeg：必须可用，导出 MP4 时需要
+```json
+{
+  "mode": "demo",
+  "rawVideoPath": "assets/raw/main.mp4",
+  "captionPath": "captions/main.srt",
+  "demoCaptionPath": "captions/sample.srt",
+  "outputName": "version-001.mp4",
+  "autoDetectDuration": true,
+  "fallbackDuration": 15
+}
+```
 
-然后安装依赖并生成第一版数据：
+说明：
+
+- `mode: "demo"`：读取 `demoCaptionPath`，使用占位画面，不要求 `main.mp4` 存在。
+- `mode: "real"`：读取 `rawVideoPath` 和 `captionPath`，缺少 `main.mp4` 或 `main.srt` 会清晰失败。
+- `autoDetectDuration: true`：real 模式用 ffprobe 读取真实视频时长，覆盖默认 15 秒。
+- `fallbackDuration`：无法自动探测或 demo 模式下的兜底时长。
+
+## Demo 模式怎么跑
+
+适合第一次验证项目是否正常：
 
 ```bash
 npm install
 npm run build:demo
+npm run preview
+npm run render
 ```
 
-`build:demo` 会依次执行：
+`npm run build:demo` 会依次执行：
 
-1. `npm run parse`：解析 SRT。
-2. `npm run plan`：生成剪辑计划。
-3. `npm run validate`：检查项目结构和环境。
+1. 解析 `captions/sample.srt`
+2. 生成 `captions/edit-plan.json`
+3. 生成/同步 `compositions/version-001.html`、`compositions/current.html`、`index.html`
+4. 校验项目结构和 HyperFrames composition 规范
 
-## 6. 如何替换成自己的视频
+导出结果在：
 
-把你的口播视频放到：
+```text
+output/version-001.mp4
+```
+
+## 真实素材接入
+
+### 1. 放视频
+
+把你的主视频放到：
 
 ```text
 assets/raw/main.mp4
 ```
 
-如果你想用别的路径，请修改 `edit.config.json`：
+### 2. 放字幕
 
-```json
-"rawVideoPath": "assets/raw/main.mp4"
-```
-
-注意：`assets/raw/*` 已被 `.gitignore` 忽略，真实素材不会提交到 GitHub。
-
-## 7. 如何放 SRT 字幕
-
-默认字幕文件是：
+把同一条视频对应的 SRT 字幕放到：
 
 ```text
-captions/sample.srt
+captions/main.srt
 ```
 
-格式示例：
+SRT 示例：
 
 ```srt
 1
@@ -111,156 +94,164 @@ captions/sample.srt
 这个视频开头所有的剪辑和动画效果，都是 AI 完成的
 ```
 
-替换后运行：
+### 3. 选择模式
+
+方式 A：直接运行 real 命令，不需要改文件：
 
 ```bash
-npm run parse
+npm run build:real
 ```
 
-解析结果会写入：
+方式 B：把 `edit.config.json` 改成：
 
-```text
-captions/parsed-captions.json
+```json
+"mode": "real"
 ```
 
-## 8. 如何写自然语言剪辑需求
-
-把需求写在：
-
-```text
-prompts/edit-request.md
-```
-
-当前 MVP 已放入示例需求。第一阶段 `build-edit-plan.js` 还不会真正调用 LLM，但代码结构已经预留 `generatedFrom: [parsedCaptionPath, prompts/edit-request.md]`，后续可以把这里接入模型能力。
-
-## 9. 如何生成第一版
-
-运行：
+然后运行：
 
 ```bash
-npm run build:demo
+npm run build:real
 ```
 
-它会生成或刷新：
-
-- `captions/parsed-captions.json`
-- `captions/edit-plan.json`
-
-第一版 composition 已在：
-
-- `compositions/version-001.html`
-- `compositions/current.html`
-- `index.html`
-
-## 10. 如何预览
-
-在能访问 npm registry 的环境中运行：
+### 4. 预览和导出
 
 ```bash
 npm run preview
+npm run render:real
 ```
 
-它会执行：
+也可以先构建再普通导出：
 
 ```bash
-npx hyperframes preview . --port 3002
-```
-
-HyperFrames 会启动预览服务，并读取根目录 `index.html`。如果你只修改了 `compositions/current.html`，请同步复制到 `index.html`，或后续把项目改造成更自动的同步流程。
-
-## 11. 如何导出
-
-在 FFmpeg 可用、HyperFrames CLI 可拉取的环境中运行：
-
-```bash
+npm run build:real
 npm run render
 ```
 
-它会执行：
+导出视频仍然在：
 
-```bash
-npx hyperframes render -c compositions/current.html -o output/version-001.mp4 --fps 30 --quality standard
+```text
+output/version-001.mp4
 ```
 
-导出文件会写入 `output/`，并且不会提交 Git。
+## 新增命令
 
-## 12. 如何做下一轮反馈
+- `npm run parse`：按当前模式解析 SRT。
+- `npm run probe`：real 模式下用 ffprobe 读取 `main.mp4` 的 `duration`、`width`、`height`、`fps`、`hasAudio`，写入 `metadata/video-metadata.json`。
+- `npm run plan`：根据解析后的字幕生成 subtitles、callouts、cameraMoves、overlays。
+- `npm run compose`：根据 config 和 edit plan 生成 HyperFrames HTML composition。
+- `npm run build:demo`：demo 模式完整构建和校验。
+- `npm run build:real`：检查真实素材、probe video、parse real srt、build edit plan、生成 composition、validate。
+- `npm run preview`：预览 current composition。
+- `npm run render`：导出 `output/version-001.mp4`。
+- `npm run render:real`：一键基于真实素材构建并导出。
 
-1. 把反馈写入 `prompts/feedback.md`。
-2. 创建下一版：
+## 已修复的 HyperFrames warning
 
-```bash
-npm run version:new
+### timed_element_missing_clip_class
+
+所有带 `data-start` / `data-duration` 的可见 HTML 元素都补齐了 `class="clip"`。真实 `<video>` 元素遵循 HyperFrames 文档：video/audio 由框架管理，不加 `class="clip"`；其外层可见容器仍是 `clip`。
+
+### timeline_track_too_dense
+
+字幕、重点大字、装饰元素被拆到更明确的 `caption-layer`、`callout-layer`、`decor-layer`，并对字幕/大字使用交错 track，避免所有 timed elements 堆在同一个 track 上。
+
+### Missing window.__timelines registration
+
+composition 现在在脚本中注册：
+
+```js
+window.__timelines["zz-auto-edit-version-001"] = tl;
 ```
 
-脚本会从 `compositions/current.html` 复制生成下一版，例如：
+如果运行环境已经提供 `window.gsap`，会注册 paused GSAP timeline；如果没有，也会注册有限 duration 的兼容 timeline，保证 StaticGuard 能看到 composition timeline。
 
-- `compositions/version-002.html`
-- `edit-notes/version-002.md`
-- `changelog/version-002.md`
+### 字体 warning
 
-然后只针对反馈里的时间段做局部微调，不要推翻整条视频。
+CSS 不再依赖单一系统中文字体，改为通用 fallback 栈：
 
-## 13. 常见问题
-
-### Node 版本不够
-
-现象：`npm run validate` 报 Node.js 版本小于 22。
-
-解决：安装 Node.js 22 或更高版本。推荐使用 nvm：
-
-```bash
-nvm install 22
-nvm use 22
+```css
+system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Noto Sans SC", Arial, sans-serif
 ```
 
-### FFmpeg 不可用
+如需完全一致的跨机器字体效果，可以自行添加 `@font-face` 并在本地引用字体文件；本仓库不提交字体文件。
 
-现象：`npm run validate` 出现 FFmpeg warning，或 `npm run render` 无法导出 MP4。
+### AudioContext warning
 
-解决：安装 FFmpeg，并确保命令行可以执行：
+当前 demo 是无音频占位画面，浏览器或 HyperFrames 在初始化媒体管线时可能出现 AudioContext 相关 warning。这类 warning 不影响当前无音频 demo 的 preview/render。real 模式如果 `main.mp4` 带音频，则由 HyperFrames 管理 `<video>` 音频播放和渲染。
+
+## 常见问题
+
+### main.mp4 找不到
+
+现象：`npm run build:real` 提示 `真实视频不存在：assets/raw/main.mp4`。
+
+解决：把视频放到 `assets/raw/main.mp4`，或修改 `edit.config.json` 的 `rawVideoPath`。
+
+### main.srt 找不到
+
+现象：`npm run build:real` 提示 `真实字幕不存在：captions/main.srt`。
+
+解决：把字幕放到 `captions/main.srt`，或修改 `edit.config.json` 的 `captionPath`。
+
+### ffprobe 失败
+
+现象：`npm run probe` 或 `npm run build:real` 提示 ffprobe 执行失败。
+
+解决：安装 FFmpeg，并确认：
 
 ```bash
-ffmpeg -version
 ffprobe -version
 ```
 
-### 没放真实视频
+### 字幕时间轴解析失败
 
-现象：`npm run validate` 提示 `assets/raw/main.mp4` 不存在。
+脚本会提示具体行号。请检查时间轴格式是否为：
 
-这是 warning，不会阻断 demo。当前 composition 会使用内置占位画面。要接真实视频，请把文件放到 `assets/raw/main.mp4`。
-
-### 字幕没解析出来
-
-请检查：
-
-1. `edit.config.json` 的 `captionPath` 是否正确。
-2. SRT 是否包含序号、时间轴、正文。
-3. 时间格式是否类似 `00:00:03,000 --> 00:00:06,000`。
-
-然后重新运行：
-
-```bash
-npm run parse
+```text
+00:00:03,000 --> 00:00:06,000
 ```
 
-### 导出失败
+结束时间必须晚于开始时间。
+
+### 视频比例不对
+
+real 模式主视频默认使用 `object-fit: contain`，优先避免人物被裁切。如果你明确想铺满画布，可以把 `edit.config.json` 中 `rules.videoFit` 改成 `cover`，但可能裁掉边缘内容。
+
+### 字体 warning
+
+如果 render 环境没有某些中文字体，会自动回退到字体栈里的其他字体。中文字幕和大字仍能显示。若要品牌级一致，可在本地加字体并写 `@font-face`，不要把字体文件提交到仓库。
+
+### preview 能看但 render 失败
 
 优先检查：
 
-1. FFmpeg 是否可用。
-2. npm 是否能拉取 `hyperframes` CLI。
-3. composition 是否存在：`compositions/current.html`。
-4. 是否能先运行 `npm run validate`。
+1. `ffmpeg -version` 是否可用。
+2. npm 是否能拉取 HyperFrames CLI。
+3. 是否能先跑通 `npm run build:demo` 或 `npm run build:real`。
+4. `compositions/current.html` 是否存在。
+5. 真实素材是否被放在 `.gitignore` 指定的本地路径，而不是误提交到 Git。
 
-如果 npm registry 对 `hyperframes` 返回 403，需要换到可访问 npm 官方 registry 的网络或私有镜像，并重新运行 `npm run render`。
+## Git 忽略规则
 
-## 14. 下一阶段计划
+以下内容必须保留忽略：
 
-- 让 composition 动态读取 `captions/edit-plan.json`，减少手写同步。
-- 接入真实视频素材，有素材时用 `<video>`，无素材时自动回退占位画面。
-- 接入 LLM，把 `prompts/edit-request.md` 转换成更智能的 callouts、cameraMoves 和 overlays。
-- 根据 `prompts/feedback.md` 自动生成局部修改建议和新版 changelog。
-- 增加 HyperFrames `lint`、`snapshot` 和视觉安全区检查。
-- 把 `.agents/skills/zz-douyin-auto-edit-hook/SKILL.md` 扩展成可复用自动剪辑 Skill。
+```text
+assets/raw/*
+assets/audio/*
+assets/images/*
+output/*
+*.mp4
+*.mov
+*.mkv
+*.avi
+*.webm
+```
+
+目录通过 `.gitkeep` 保留。
+
+## 后续自然语言微调
+
+- 把反馈写入 `prompts/feedback.md`。
+- 运行 `npm run version:new` 创建下一版。
+- 后续可以把 `scripts/build-edit-plan.js` 的简单规则替换为 LLM/Agent 规则，但保留当前 `edit-plan.json`、`edit-notes/`、`changelog/` 的版本化结构。

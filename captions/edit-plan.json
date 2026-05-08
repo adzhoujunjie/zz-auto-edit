@@ -1,12 +1,16 @@
 {
   "meta": {
     "videoTitle": "AI 自动剪辑开头 Demo",
+    "mode": "demo",
     "duration": 15,
     "fps": 30,
     "resolution": {
       "width": 1920,
       "height": 1080
     },
+    "rawVideoPath": null,
+    "captionPath": "captions/sample.srt",
+    "videoMetadata": null,
     "stylePreset": "high-quality-douyin-hook",
     "generatedFrom": [
       "captions/parsed-captions.json",
@@ -39,7 +43,8 @@
       "subtitleMaxLines": 2,
       "subtitleLanguage": "zh-CN",
       "avoidOverZoom": true,
-      "maxScale": 1.08
+      "maxScale": 1.08,
+      "videoFit": "contain"
     }
   },
   "subtitles": [
@@ -99,7 +104,7 @@
         "width": 1459,
         "height": 173
       },
-      "fontSize": 54,
+      "fontSize": 48,
       "maxLines": 2,
       "language": "zh-CN"
     },
@@ -121,10 +126,11 @@
   ],
   "callouts": [
     {
-      "id": "hook-ai-edit",
-      "start": 0.25,
-      "end": 2.75,
-      "text": "AI 自动完成剪辑",
+      "id": "callout-01",
+      "start": 0.12,
+      "end": 2.6,
+      "text": "都是 AI 完成的",
+      "subtext": "自动提取重点",
       "region": {
         "x": 154,
         "y": 86,
@@ -135,10 +141,11 @@
       "avoidCoveringPerson": true
     },
     {
-      "id": "need-timestamps",
-      "start": 9.15,
+      "id": "callout-02",
+      "start": 9.12,
       "end": 11.6,
-      "text": "关键：时间戳字幕",
+      "text": "时间戳的字幕",
+      "subtext": "",
       "region": {
         "x": 154,
         "y": 86,
@@ -155,7 +162,7 @@
       "start": 0,
       "end": 3,
       "fromScale": 1,
-      "toScale": 1.055,
+      "toScale": 1.05,
       "easing": "easeInOut",
       "note": "轻微推拉，避免高频晃动和过度放大。"
     },
@@ -163,8 +170,8 @@
       "id": "camera-02",
       "start": 3,
       "end": 6,
-      "fromScale": 1.04,
-      "toScale": 1.015,
+      "fromScale": 1.035,
+      "toScale": 1.01,
       "easing": "easeInOut",
       "note": "轻微推拉，避免高频晃动和过度放大。"
     },
@@ -173,7 +180,7 @@
       "start": 6,
       "end": 9,
       "fromScale": 1,
-      "toScale": 1.055,
+      "toScale": 1.05,
       "easing": "easeInOut",
       "note": "轻微推拉，避免高频晃动和过度放大。"
     },
@@ -181,8 +188,8 @@
       "id": "camera-04",
       "start": 9,
       "end": 12,
-      "fromScale": 1.04,
-      "toScale": 1.015,
+      "fromScale": 1.035,
+      "toScale": 1.01,
       "easing": "easeInOut",
       "note": "轻微推拉，避免高频晃动和过度放大。"
     },
@@ -191,7 +198,7 @@
       "start": 12,
       "end": 15,
       "fromScale": 1,
-      "toScale": 1.055,
+      "toScale": 1.05,
       "easing": "easeInOut",
       "note": "轻微推拉，避免高频晃动和过度放大。"
     }
