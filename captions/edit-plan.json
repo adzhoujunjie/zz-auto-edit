@@ -1,0 +1,244 @@
+{
+  "meta": {
+    "videoTitle": "AI 自动剪辑开头 Demo",
+    "duration": 15,
+    "fps": 30,
+    "resolution": {
+      "width": 1920,
+      "height": 1080
+    },
+    "stylePreset": "high-quality-douyin-hook",
+    "generatedFrom": [
+      "captions/parsed-captions.json",
+      "prompts/edit-request.md"
+    ]
+  },
+  "safety": {
+    "safeArea": {
+      "personRegion": {
+        "x": 0.32,
+        "y": 0.08,
+        "width": 0.36,
+        "height": 0.82
+      },
+      "subtitleRegion": {
+        "x": 0.12,
+        "y": 0.78,
+        "width": 0.76,
+        "height": 0.16
+      },
+      "titleRegion": {
+        "x": 0.08,
+        "y": 0.08,
+        "width": 0.84,
+        "height": 0.2
+      }
+    },
+    "rules": {
+      "avoidCoveringPerson": true,
+      "subtitleMaxLines": 2,
+      "subtitleLanguage": "zh-CN",
+      "avoidOverZoom": true,
+      "maxScale": 1.08
+    }
+  },
+  "subtitles": [
+    {
+      "id": "subtitle-01",
+      "start": 0,
+      "end": 3,
+      "text": "这个视频开头所有的剪辑和动画效果，都是 AI 完成的",
+      "position": {
+        "x": 230,
+        "y": 842,
+        "width": 1459,
+        "height": 173
+      },
+      "fontSize": 48,
+      "maxLines": 2,
+      "language": "zh-CN"
+    },
+    {
+      "id": "subtitle-02",
+      "start": 3,
+      "end": 6,
+      "text": "我只需要给它原始素材，再用自然语言告诉它需求",
+      "position": {
+        "x": 230,
+        "y": 842,
+        "width": 1459,
+        "height": 173
+      },
+      "fontSize": 48,
+      "maxLines": 2,
+      "language": "zh-CN"
+    },
+    {
+      "id": "subtitle-03",
+      "start": 6,
+      "end": 9,
+      "text": "这一期我们就实操看看，AI 后期到底怎么做",
+      "position": {
+        "x": 230,
+        "y": 842,
+        "width": 1459,
+        "height": 173
+      },
+      "fontSize": 48,
+      "maxLines": 2,
+      "language": "zh-CN"
+    },
+    {
+      "id": "subtitle-04",
+      "start": 9,
+      "end": 12,
+      "text": "最关键的是，一定要给它带时间戳的字幕",
+      "position": {
+        "x": 230,
+        "y": 842,
+        "width": 1459,
+        "height": 173
+      },
+      "fontSize": 54,
+      "maxLines": 2,
+      "language": "zh-CN"
+    },
+    {
+      "id": "subtitle-05",
+      "start": 12,
+      "end": 15,
+      "text": "这样它才能知道什么时候该加什么效果",
+      "position": {
+        "x": 230,
+        "y": 842,
+        "width": 1459,
+        "height": 173
+      },
+      "fontSize": 48,
+      "maxLines": 2,
+      "language": "zh-CN"
+    }
+  ],
+  "callouts": [
+    {
+      "id": "hook-ai-edit",
+      "start": 0.25,
+      "end": 2.75,
+      "text": "AI 自动完成剪辑",
+      "region": {
+        "x": 154,
+        "y": 86,
+        "width": 1613,
+        "height": 216
+      },
+      "align": "left",
+      "avoidCoveringPerson": true
+    },
+    {
+      "id": "need-timestamps",
+      "start": 9.15,
+      "end": 11.6,
+      "text": "关键：时间戳字幕",
+      "region": {
+        "x": 154,
+        "y": 86,
+        "width": 1613,
+        "height": 216
+      },
+      "align": "left",
+      "avoidCoveringPerson": true
+    }
+  ],
+  "cameraMoves": [
+    {
+      "id": "camera-01",
+      "start": 0,
+      "end": 3,
+      "fromScale": 1,
+      "toScale": 1.055,
+      "easing": "easeInOut",
+      "note": "轻微推拉，避免高频晃动和过度放大。"
+    },
+    {
+      "id": "camera-02",
+      "start": 3,
+      "end": 6,
+      "fromScale": 1.04,
+      "toScale": 1.015,
+      "easing": "easeInOut",
+      "note": "轻微推拉，避免高频晃动和过度放大。"
+    },
+    {
+      "id": "camera-03",
+      "start": 6,
+      "end": 9,
+      "fromScale": 1,
+      "toScale": 1.055,
+      "easing": "easeInOut",
+      "note": "轻微推拉，避免高频晃动和过度放大。"
+    },
+    {
+      "id": "camera-04",
+      "start": 9,
+      "end": 12,
+      "fromScale": 1.04,
+      "toScale": 1.015,
+      "easing": "easeInOut",
+      "note": "轻微推拉，避免高频晃动和过度放大。"
+    },
+    {
+      "id": "camera-05",
+      "start": 12,
+      "end": 15,
+      "fromScale": 1,
+      "toScale": 1.055,
+      "easing": "easeInOut",
+      "note": "轻微推拉，避免高频晃动和过度放大。"
+    }
+  ],
+  "overlays": [
+    {
+      "id": "left-rule",
+      "type": "accent-line",
+      "start": 0,
+      "end": 15,
+      "zIndex": 2,
+      "position": {
+        "x": 112,
+        "y": 160,
+        "width": 8,
+        "height": 180
+      },
+      "avoidRegion": "personRegion"
+    },
+    {
+      "id": "plan-chip",
+      "type": "rounded-label",
+      "start": 3.1,
+      "end": 5.8,
+      "zIndex": 3,
+      "text": "素材 + 需求 + 字幕",
+      "position": {
+        "x": 118,
+        "y": 742,
+        "width": 420,
+        "height": 74
+      },
+      "avoidRegion": "personRegion"
+    },
+    {
+      "id": "clean-dot",
+      "type": "small-dot",
+      "start": 12.2,
+      "end": 14.6,
+      "zIndex": 2,
+      "position": {
+        "x": 1660,
+        "y": 170,
+        "width": 22,
+        "height": 22
+      },
+      "avoidRegion": "personRegion"
+    }
+  ]
+}

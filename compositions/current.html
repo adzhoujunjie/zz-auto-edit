@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh-CN" data-composition-id="zz-auto-edit-version-001" data-start="0" data-duration="15" data-width="1920" data-height="1080">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=1920, height=1080, initial-scale=1" />
+  <title>AI 自动剪辑开头 Demo - version-001</title>
+  <style>
+    :root { color-scheme: dark; --accent: #42f5b6; --gold: #ffd166; --ink: #0b1020; }
+    * { box-sizing: border-box; }
+    html, body { width: 1920px; height: 1080px; margin: 0; overflow: hidden; background: #0c1020; font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", Arial, sans-serif; }
+    #stage { position: relative; width: 1920px; height: 1080px; background: radial-gradient(circle at 26% 18%, rgba(66,245,182,.25), transparent 26%), linear-gradient(135deg, #111936 0%, #080b16 60%, #15192b 100%); color: #fff; isolation: isolate; }
+    .video-plate { position: absolute; inset: 64px 110px 118px 110px; border-radius: 36px; overflow: hidden; background: linear-gradient(145deg, rgba(255,255,255,.07), rgba(255,255,255,.02)); border: 1px solid rgba(255,255,255,.16); box-shadow: 0 28px 90px rgba(0,0,0,.42); transform-origin: 50% 48%; animation: camera 15s ease-in-out both; }
+    .grid { position: absolute; inset: 0; opacity: .22; background-image: linear-gradient(rgba(255,255,255,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.08) 1px, transparent 1px); background-size: 80px 80px; }
+    .person-safe { position: absolute; left: 614px; top: 86px; width: 691px; height: 786px; border-radius: 999px 999px 120px 120px; background: linear-gradient(180deg, rgba(255,255,255,.20), rgba(255,255,255,.06)); box-shadow: inset 0 0 0 2px rgba(255,255,255,.18); }
+    .avatar { position: absolute; left: 784px; top: 196px; width: 352px; height: 520px; border-radius: 180px 180px 74px 74px; background: linear-gradient(180deg, #d8e4ff, #7183ad 55%, #2c375f); box-shadow: 0 30px 70px rgba(0,0,0,.32); }
+    .avatar::before { content: ""; position: absolute; left: 96px; top: -82px; width: 160px; height: 160px; border-radius: 50%; background: linear-gradient(160deg, #f4d2b8, #b98568); box-shadow: inset -18px -12px 0 rgba(0,0,0,.08); }
+    .placeholder-label { position: absolute; left: 758px; top: 752px; width: 404px; text-align: center; font-size: 28px; letter-spacing: .06em; color: rgba(255,255,255,.72); }
+    .accent-line { position: absolute; left: 112px; top: 160px; width: 8px; height: 180px; border-radius: 99px; background: var(--accent); box-shadow: 0 0 32px rgba(66,245,182,.65); z-index: 2; }
+    .brand { position: absolute; right: 128px; top: 92px; font-size: 26px; color: rgba(255,255,255,.68); letter-spacing: .14em; }
+    .callout { position: absolute; left: 154px; top: 118px; max-width: 760px; padding: 22px 30px; border-radius: 28px; font-weight: 900; font-size: 72px; line-height: 1.08; letter-spacing: -.04em; color: #08111f; background: linear-gradient(135deg, #ffffff, #b9ffe7); box-shadow: 0 24px 60px rgba(0,0,0,.28); opacity: 0; transform: translateY(36px) scale(.96); z-index: 5; }
+    .callout small { display: block; margin-top: 10px; font-size: 28px; letter-spacing: .06em; color: rgba(8,17,31,.62); }
+    .callout-1 { animation: calloutIn 2.5s .25s cubic-bezier(.2,.9,.2,1) both; }
+    .callout-2 { top: 122px; background: linear-gradient(135deg, #fff9e8, #ffd166); animation: calloutIn 2.45s 9.15s cubic-bezier(.2,.9,.2,1) both; }
+    .chip { position: absolute; left: 118px; bottom: 264px; width: 420px; height: 74px; display: grid; place-items: center; border-radius: 99px; background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.20); backdrop-filter: blur(18px); color: rgba(255,255,255,.92); font-size: 30px; font-weight: 700; opacity: 0; animation: fadeWindow 2.7s 3.1s both; z-index: 3; }
+    .dot { position: absolute; right: 238px; top: 170px; width: 22px; height: 22px; border-radius: 50%; background: var(--gold); opacity: 0; animation: fadeWindow 2.4s 12.2s both; }
+    .subtitle { position: absolute; left: 230px; bottom: 92px; width: 1460px; min-height: 112px; display: grid; place-items: center; padding: 22px 46px; border-radius: 30px; background: rgba(0,0,0,.58); border: 1px solid rgba(255,255,255,.16); box-shadow: 0 18px 54px rgba(0,0,0,.34); font-size: 48px; font-weight: 800; line-height: 1.28; text-align: center; text-wrap: balance; opacity: 0; transform: translateY(18px); z-index: 6; }
+    .s1 { animation: subtitleIn 3s 0s both; } .s2 { animation: subtitleIn 3s 3s both; } .s3 { animation: subtitleIn 3s 6s both; } .s4 { font-size: 54px; animation: subtitleIn 3s 9s both; } .s5 { animation: subtitleIn 3s 12s both; }
+    .timebar { position: absolute; left: 110px; right: 110px; bottom: 48px; height: 6px; border-radius: 99px; background: rgba(255,255,255,.14); overflow: hidden; }
+    .timebar::after { content: ""; display: block; width: 100%; height: 100%; background: linear-gradient(90deg, var(--accent), var(--gold)); transform-origin: left; animation: progress 15s linear both; }
+    @keyframes camera { 0%{transform:scale(1)} 20%{transform:scale(1.055)} 40%{transform:scale(1.015)} 60%{transform:scale(1.05)} 80%{transform:scale(1.02)} 100%{transform:scale(1.04)} }
+    @keyframes calloutIn { 0%{opacity:0;transform:translateY(36px) scale(.96)} 16%,82%{opacity:1;transform:translateY(0) scale(1)} 100%{opacity:0;transform:translateY(-18px) scale(.99)} }
+    @keyframes subtitleIn { 0%,100%{opacity:0;transform:translateY(18px)} 10%,88%{opacity:1;transform:translateY(0)} }
+    @keyframes fadeWindow { 0%,100%{opacity:0;transform:translateY(14px)} 12%,84%{opacity:1;transform:translateY(0)} }
+    @keyframes progress { from{transform:scaleX(0)} to{transform:scaleX(1)} }
+  </style>
+</head>
+<body>
+  <main id="stage" data-composition-id="zz-auto-edit-version-001" data-start="0" data-duration="15" data-width="1920" data-height="1080">
+    <section class="video-plate" data-start="0" data-duration="15" data-track-index="0" aria-label="主视频占位区域">
+      <div class="grid"></div><div class="person-safe"></div><div class="avatar"></div><div class="placeholder-label">主视频占位区域 / assets/raw/main.mp4</div>
+    </section>
+    <div class="accent-line" data-start="0" data-duration="15" data-track-index="1"></div>
+    <div class="brand" data-start="0" data-duration="15" data-track-index="2">ZZ AUTO EDIT</div>
+    <h1 class="callout callout-1" data-start="0.25" data-duration="2.5" data-track-index="3">AI 自动完成剪辑<small>开头 3 秒先建立期待</small></h1>
+    <div class="chip" data-start="3.1" data-duration="2.7" data-track-index="3">素材 + 需求 + 字幕</div>
+    <h2 class="callout callout-2" data-start="9.15" data-duration="2.45" data-track-index="3">关键：时间戳字幕<small>让效果和内容对齐</small></h2>
+    <div class="dot" data-start="12.2" data-duration="2.4" data-track-index="3"></div>
+    <p class="subtitle s1" data-start="0" data-duration="3" data-track-index="4">这个视频开头所有的剪辑和动画效果，都是 AI 完成的</p>
+    <p class="subtitle s2" data-start="3" data-duration="3" data-track-index="4">我只需要给它原始素材，再用自然语言告诉它需求</p>
+    <p class="subtitle s3" data-start="6" data-duration="3" data-track-index="4">这一期我们就实操看看，AI 后期到底怎么做</p>
+    <p class="subtitle s4" data-start="9" data-duration="3" data-track-index="4">最关键的是，一定要给它带时间戳的字幕</p>
+    <p class="subtitle s5" data-start="12" data-duration="3" data-track-index="4">这样它才能知道什么时候该加什么效果</p>
+    <div class="timebar" data-start="0" data-duration="15" data-track-index="5"></div>
+  </main>
+</body>
+</html>
