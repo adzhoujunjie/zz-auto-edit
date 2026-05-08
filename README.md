@@ -244,6 +244,151 @@ npm run render
 npm run render:real
 ```
 
+## 自然语言反馈微调
+
+这一流程适合在 `version-001` 已经能预览或导出后，基于中文修改意见做局部微调。它不会重新设计整条视频，也不会调用外部 LLM API；MVP 只解析常见中文反馈，更新剪辑计划，生成 `version-002` composition、说明和 changelog。
+
+### 1. 先生成真实视频
+
+请先确认真实素材已经放好：
+
+```text
+assets/raw/main.mp4
+captions/main.srt
+```
+
+然后运行：
+
+```bash
+npm run build:real
+```
+
+### 2. 编辑反馈文件
+
+打开并编辑：
+
+```text
+prompts/feedback.md
+```
+
+示例：
+
+```text
+请基于 version-001 做局部微调，不要推翻整条视频：
+
+1. 0:03-0:05 镜头拉远一点，人物不要太满。
+2. 0:05-0:07 大字往左上移动，避免挡住人物。
+3. 0:06-0:09 字幕字号加大一点。
+4. 0:07-0:09 减少装饰元素，让画面更干净。
+5. 全片画面稍微提亮一点。
+```
+
+当前支持的中文反馈包括：
+
+- 时间范围：`0:03-0:05`、`00:03-00:05`、`3秒-5秒`、`3-5秒`。
+- 目标：镜头/画面/人物太满、大字/标题、字幕/底部字幕、装饰/元素/贴图、全片/整体。
+- 动作：拉远、推近、往左上/右上、上移/下移、字号加大/变小、删除/去掉/减少、提亮/暗一点。
+
+### 3. 生成反馈版
+
+运行：
+
+```bash
+npm run build:feedback
+```
+
+它会串联：
+
+1. `npm run build:real`：重新基于真实素材生成当前 `version-001` 计划。
+2. `npm run feedback:parse`：把 `prompts/feedback.md` 解析到 `prompts/feedback-plan.json`。
+3. `npm run feedback:apply`：生成 `version-002`，并把 `compositions/current.html` 更新为反馈版。
+
+成功后会生成或更新：
+
+```text
+prompts/feedback-plan.json
+captions/edit-plan.version-002.json
+captions/edit-plan.json
+compositions/version-002.html
+compositions/current.html
+edit-notes/version-002.md
+changelog/version-002.md
+```
+
+`compositions/version-001.html`、`edit-notes/version-001.md`、`changelog/version-001.md` 会保留，不会被反馈流程覆盖。
+
+### 4. 预览
+
+运行：
+
+```bash
+npm run preview
+```
+
+浏览器会预览当前的 `compositions/current.html`，也就是反馈后的 `version-002`。
+
+### 5. 导出
+
+运行：
+
+```bash
+npm run render:feedback
+```
+
+输出位置：
+
+```text
+output/version-002.mp4
+```
+
+### 常见问题
+
+#### 时间格式写错
+
+请优先使用 `0:03-0:05` 或 `3秒-5秒`。如果某条无法识别，`feedback:parse` 会在终端给出 warning，并把它写入 `prompts/feedback-plan.json` 的 `unresolvedItems`。
+
+#### 反馈没有被识别
+
+当前是规则 MVP，不理解复杂自然语言。请把反馈拆成短句，并明确写出时间、目标和动作，例如“0:06-0:09 字幕字号加大一点”。无法识别的反馈不会阻断构建，但会写入 `edit-notes/version-002.md`。
+
+#### 预览还是旧版本
+
+请确认已经成功运行 `npm run build:feedback`，并检查 `compositions/current.html` 是否包含 `zz-auto-edit-version-002`。如果浏览器缓存了旧页面，请刷新预览页面。
+
+#### 字幕太大超出画面
+
+反馈流程会限制字幕最多两行，并把字号控制在安全范围内。如果本地素材字幕特别长，请缩短 SRT 单句长度，或把反馈改成“字幕字号变小”。
+
+#### 大字仍然挡人
+
+请使用更明确的反馈，例如“0:05-0:07 大字往左上移动”。当前规则会把大字移到更靠左上并缩小可用宽度，尽量避开 `safeArea.personRegion`，但不会做真实人物检测。
+
+#### render:feedback 失败怎么定位
+
+请拆开执行：
+
+```bash
+npm run build:feedback
+npx hyperframes render -c compositions/current.html -o output/version-002.mp4 --fps 30 --quality standard
+npm run assert:feedback-render
+```
+
+- 如果 `build:feedback` 失败，优先检查真实素材、SRT、ffprobe、反馈格式和 `version-002` 后置校验。
+- 如果 render 命令失败，优先检查 HyperFrames、FFmpeg 和本机导出环境。
+- 如果只有 `assert:feedback-render` 失败，请检查 `output/version-002.mp4` 是否存在、是否被占用、文件大小是否为 0。
+
+### Windows 本地最终验收命令
+
+```powershell
+npm run build:real
+npm run render:real
+npm run feedback:parse
+npm run build:feedback
+npm run preview
+npm run render:feedback
+```
+
+
 ## 新增命令
 
 - `npm run parse`：按当前模式解析 SRT。
@@ -256,6 +401,11 @@ npm run render:real
 - `npm run render`：导出 `output/version-001.mp4`。
 - `npm run assert:render`：检查 `output/version-001.mp4` 是否存在且文件大小大于 0。
 - `npm run render:real`：一键串联 `build:real`、`render`、`assert:render`，基于真实素材构建并导出。
+- `npm run feedback:parse`：解析 `prompts/feedback.md`，生成 `prompts/feedback-plan.json`。
+- `npm run feedback:apply`：基于反馈计划生成 `version-002` 剪辑计划、composition、notes 和 changelog。
+- `npm run build:feedback`：串联 `build:real`、`feedback:parse`、`feedback:apply`，生成反馈版。
+- `npm run render:feedback`：构建反馈版并导出 `output/version-002.mp4`。
+- `npm run assert:feedback-render`：检查 `output/version-002.mp4` 是否存在且文件大小大于 0。
 
 ## 已修复的 HyperFrames warning
 
@@ -363,6 +513,4 @@ output/*
 
 ## 后续自然语言微调
 
-- 把反馈写入 `prompts/feedback.md`。
-- 运行 `npm run version:new` 创建下一版。
-- 后续可以把 `scripts/build-edit-plan.js` 的简单规则替换为 LLM/Agent 规则，但保留当前 `edit-plan.json`、`edit-notes/`、`changelog/` 的版本化结构。
+当前已提供 `feedback:parse`、`build:feedback` 和 `render:feedback` 的本地规则 MVP。后续如果继续增强，可以扩展 `scripts/parse-feedback.js` 的规则或 `scripts/apply-feedback.js` 的局部调整策略，但仍应保留当前 `edit-plan.json`、`edit-notes/`、`changelog/` 的版本化结构。

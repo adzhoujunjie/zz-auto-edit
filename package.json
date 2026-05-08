@@ -16,7 +16,12 @@
     "compose": "node scripts/generate-composition.js",
     "build:real": "node scripts/run-build.js real",
     "render:real": "npm run build:real && npm run render && npm run assert:render",
-    "assert:render": "node scripts/assert-render-output.js"
+    "assert:render": "node scripts/assert-render-output.js",
+    "feedback:parse": "node scripts/parse-feedback.js",
+    "feedback:apply": "node scripts/apply-feedback.js",
+    "build:feedback": "npm run build:real && npm run feedback:parse && npm run feedback:apply",
+    "render:feedback": "npm run build:feedback && npx hyperframes render -c compositions/current.html -o output/version-002.mp4 --fps 30 --quality standard && npm run assert:feedback-render",
+    "assert:feedback-render": "node scripts/assert-render-output.js output/version-002.mp4"
   },
   "engines": {
     "node": ">=22"

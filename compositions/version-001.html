@@ -8,29 +8,29 @@
     :root { color-scheme: dark; --accent: #42f5b6; --gold: #ffd166; --ink: #0b1020; --max-scale: 1.08; }
     * { box-sizing: border-box; }
     html, body { width: 1920px; height: 1080px; margin: 0; overflow: hidden; background: #0c1020; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Noto Sans SC", Arial, sans-serif; }
-    #stage { position: relative; width: 1920px; height: 1080px; background: radial-gradient(circle at 26% 18%, rgba(66,245,182,.25), transparent 26%), linear-gradient(135deg, #111936 0%, #080b16 60%, #15192b 100%); color: #fff; isolation: isolate; }
+    #stage { position: relative; width: 1920px; height: 1080px; background: radial-gradient(circle at 26% 18%, rgba(66,245,182,.25), transparent 26%), linear-gradient(135deg, #111936 0%, #080b16 60%, #15192b 100%); color: #fff; isolation: isolate; filter: brightness(1) contrast(1); }
     .clip { will-change: opacity, transform; }
     .video-plate { position: absolute; inset: 64px 110px 118px 110px; border-radius: 36px; overflow: hidden; background: linear-gradient(145deg, rgba(255,255,255,.07), rgba(255,255,255,.02)); border: 1px solid rgba(255,255,255,.16); box-shadow: 0 28px 90px rgba(0,0,0,.42); transform-origin: 50% 48%; animation: camera 15s ease-in-out both; }
     #main-video { width: 100%; height: 100%; display: block; object-fit: contain; background: #05070f; }
     .grid { position: absolute; inset: 0; opacity: .22; background-image: linear-gradient(rgba(255,255,255,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.08) 1px, transparent 1px); background-size: 80px 80px; }
     .person-safe { position: absolute; left: 614px; top: 86px; width: 691px; height: 786px; border-radius: 999px 999px 120px 120px; background: linear-gradient(180deg, rgba(255,255,255,.20), rgba(255,255,255,.06)); box-shadow: inset 0 0 0 2px rgba(255,255,255,.18); }
     .avatar { position: absolute; left: 784px; top: 196px; width: 352px; height: 520px; border-radius: 180px 180px 74px 74px; background: linear-gradient(180deg, #d8e4ff, #7183ad 55%, #2c375f); box-shadow: 0 30px 70px rgba(0,0,0,.32); }
-    .avatar::before { content: ""; position: absolute; left: 96px; top: -82px; width: 160px; height: 160px; border-radius: 50%; background: linear-gradient(160deg, #f4d2b8, #b98568); box-shadow: inset -18px -12px 0 rgba(0,0,0,.08); }
-    .placeholder-label { position: absolute; left: 758px; top: 752px; width: 404px; text-align: center; font-size: 28px; letter-spacing: .06em; color: rgba(255,255,255,.72); }
-    .accent-line { position: absolute; border-radius: 99px; background: var(--accent); box-shadow: 0 0 32px rgba(66,245,182,.65); z-index: 2; }
-    .brand { position: absolute; right: 128px; top: 92px; font-size: 26px; color: rgba(255,255,255,.68); letter-spacing: .14em; }
-    .callout { position: absolute; left: 154px; top: 118px; max-width: 760px; padding: 22px 30px; border-radius: 28px; font-weight: 900; font-size: 72px; line-height: 1.08; letter-spacing: -.04em; color: #08111f; background: linear-gradient(135deg, #ffffff, #b9ffe7); box-shadow: 0 24px 60px rgba(0,0,0,.28); opacity: 0; transform: translateY(36px) scale(.96); z-index: 5; animation: calloutIn var(--clip-duration) var(--clip-delay) cubic-bezier(.2,.9,.2,1) both; }
+    .avatar::before { content: ""; position: absolute; left: 96px; top: -82px; width: 160px; height: 160px; border-radius: 50%; background: linear-gradient(180deg, #f7d7bd, #b47a5a); }
+    .placeholder-label { position: absolute; left: 48px; bottom: 42px; color: rgba(255,255,255,.72); font-size: 28px; letter-spacing: .05em; }
+    .brand { position: absolute; right: 112px; top: 48px; font-size: 22px; font-weight: 800; letter-spacing: .22em; color: rgba(255,255,255,.56); z-index: 8; }
+    .accent-line { position: absolute; border-radius: 999px; background: linear-gradient(180deg, var(--accent), transparent); opacity: 0; animation: fadeWindow var(--clip-duration) var(--clip-delay) both; z-index: 2; }
+    .callout { --callout-scale: 1; position: absolute; left: 154px; top: 86px; max-width: 960px; min-height: 120px; margin: 0; padding: 24px 34px; border-radius: 28px; background: linear-gradient(135deg, var(--accent), #b8ffdf); color: var(--ink); font-size: 68px; line-height: 1.04; font-weight: 950; letter-spacing: -.04em; box-shadow: 0 24px 70px rgba(66,245,182,.22); opacity: 0; transform: translateY(36px) scale(.96); z-index: 5; animation: calloutIn var(--clip-duration) var(--clip-delay) cubic-bezier(.2,.9,.2,1) both; }
     .callout small { display: block; margin-top: 10px; font-size: 28px; letter-spacing: .06em; color: rgba(8,17,31,.62); }
     .callout-2 { top: 122px; background: linear-gradient(135deg, #fff9e8, #ffd166); }
     .chip { position: absolute; display: grid; place-items: center; border-radius: 99px; background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.20); backdrop-filter: blur(18px); color: rgba(255,255,255,.92); font-size: 30px; font-weight: 700; opacity: 0; animation: fadeWindow var(--clip-duration) var(--clip-delay) both; z-index: 3; }
     .dot { position: absolute; border-radius: 50%; background: var(--gold); opacity: 0; animation: fadeWindow var(--clip-duration) var(--clip-delay) both; }
-    .subtitle { position: absolute; left: 230px; bottom: 92px; width: 1460px; min-height: 112px; display: grid; place-items: center; padding: 22px 46px; border-radius: 30px; background: rgba(0,0,0,.58); border: 1px solid rgba(255,255,255,.16); box-shadow: 0 18px 54px rgba(0,0,0,.34); font-weight: 800; line-height: 1.28; text-align: center; text-wrap: balance; opacity: 0; transform: translateY(18px); z-index: 6; animation: subtitleIn var(--clip-duration) var(--clip-delay) both; }
+    .subtitle { position: absolute; left: 230px; bottom: auto; top: 842px; width: 1460px; min-height: 112px; display: grid; place-items: center; padding: 22px 46px; border-radius: 30px; background: rgba(0,0,0,.58); border: 1px solid rgba(255,255,255,.16); box-shadow: 0 18px 54px rgba(0,0,0,.34); font-weight: 800; line-height: 1.28; text-align: center; text-wrap: balance; opacity: 0; transform: translateY(18px); z-index: 6; animation: subtitleIn var(--clip-duration) var(--clip-delay) both; overflow: hidden; }
     .timebar { position: absolute; left: 110px; right: 110px; bottom: 48px; height: 6px; border-radius: 99px; background: rgba(255,255,255,.14); overflow: hidden; }
     .timebar::after { content: ""; display: block; width: 100%; height: 100%; background: linear-gradient(90deg, var(--accent), var(--gold)); transform-origin: left; animation: progress 15s linear both; }
-    @keyframes camera { 0%{transform:scale(1)} 25%{transform:scale(min(var(--max-scale),1.05))} 50%{transform:scale(1.015)} 75%{transform:scale(min(var(--max-scale),1.04))} 100%{transform:scale(1.02)} }
-    @keyframes calloutIn { 0%{opacity:0;transform:translateY(36px) scale(.96)} 16%,82%{opacity:1;transform:translateY(0) scale(1)} 100%{opacity:0;transform:translateY(-18px) scale(.99)} }
+    @keyframes camera { 0%{transform:scale(1)} 0%{transform:scale(1)} 20%{transform:scale(1.05)} 20%{transform:scale(1.035)} 40%{transform:scale(1.01)} 40%{transform:scale(1)} 60%{transform:scale(1.05)} 60%{transform:scale(1.035)} 80%{transform:scale(1.01)} 80%{transform:scale(1)} 100%{transform:scale(1.05)} 100%{transform:scale(1.05)} }
+    @keyframes calloutIn { 0%{opacity:0;transform:translateY(36px) scale(calc(.96 * var(--callout-scale)))} 16%,82%{opacity:1;transform:translateY(0) scale(var(--callout-scale))} 100%{opacity:0;transform:translateY(-18px) scale(calc(.99 * var(--callout-scale)))} }
     @keyframes subtitleIn { 0%,100%{opacity:0;transform:translateY(18px)} 10%,88%{opacity:1;transform:translateY(0)} }
-    @keyframes fadeWindow { 0%,100%{opacity:0;transform:translateY(14px)} 12%,84%{opacity:1;transform:translateY(0)} }
+    @keyframes fadeWindow { 0%,100%{opacity:0;transform:translateY(14px)} 12%,84%{opacity:var(--overlay-opacity, 1);transform:translateY(0)} }
     @keyframes progress { from{transform:scaleX(0)} to{transform:scaleX(1)} }
   </style>
 </head>
@@ -41,20 +41,20 @@
     </section>
     <div id="brand" class="clip brand" data-start="0" data-duration="15" data-track-index="2">ZZ AUTO EDIT</div>
     <section id="decor-layer" data-timeline-role="decorations" aria-label="装饰元素">
-      <div id="left-rule" class="clip accent-line" data-start="0" data-duration="15" data-track-index="3" style="left:112px;top:160px;width:8px;height:180px;--clip-duration:15s;--clip-delay:0s"></div>
-      <div id="plan-chip" class="clip chip" data-start="3.1" data-duration="2.6999999999999997" data-track-index="5" style="left:118px;top:742px;width:420px;height:74px;--clip-duration:2.6999999999999997s;--clip-delay:3.1s">素材 + 需求 + 字幕</div>
-      <div id="clean-dot" class="clip dot" data-start="12.2" data-duration="2.4000000000000004" data-track-index="4" style="left:1660px;top:170px;width:22px;height:22px;--clip-duration:2.4000000000000004s;--clip-delay:12.2s"></div>
+      <div id="left-rule" class="clip accent-line" data-start="0" data-duration="15" data-track-index="3" style="left:112px;top:160px;width:8px;height:180px;--clip-duration:15s;--clip-delay:0s;"></div>
+      <div id="plan-chip" class="clip chip" data-start="3.1" data-duration="2.6999999999999997" data-track-index="5" style="left:118px;top:742px;width:420px;height:74px;--clip-duration:2.6999999999999997s;--clip-delay:3.1s;">素材 + 需求 + 字幕</div>
+      <div id="clean-dot" class="clip dot" data-start="12.2" data-duration="2.4000000000000004" data-track-index="4" style="left:1660px;top:170px;width:22px;height:22px;--clip-duration:2.4000000000000004s;--clip-delay:12.2s;"></div>
     </section>
     <section id="callout-layer" data-timeline-role="callouts" aria-label="重点大字">
-      <h2 id="callout-01" class="clip callout callout-1" data-start="0.12" data-duration="2.48" data-track-index="6" style="--clip-duration:2.48s;--clip-delay:0.12s">都是 AI 完成的<small>自动提取重点</small></h2>
-      <h2 id="callout-02" class="clip callout callout-2" data-start="9.12" data-duration="2.4800000000000004" data-track-index="7" style="--clip-duration:2.4800000000000004s;--clip-delay:9.12s">时间戳的字幕</h2>
+      <h2 id="callout-01" class="clip callout callout-1" data-start="0.12" data-duration="2.48" data-track-index="6" style="--clip-duration:2.48s;--clip-delay:0.12s;left:154px;top:86px;width:1613px;min-height:216px;">都是 AI 完成的<small>自动提取重点</small></h2>
+      <h2 id="callout-02" class="clip callout callout-2" data-start="9.12" data-duration="2.4800000000000004" data-track-index="7" style="--clip-duration:2.4800000000000004s;--clip-delay:9.12s;left:154px;top:86px;width:1613px;min-height:216px;">时间戳的字幕</h2>
     </section>
     <section id="caption-layer" data-timeline-role="captions" data-caption-root="true" aria-label="中文字幕">
-      <p id="subtitle-01" class="clip subtitle" data-start="0" data-duration="3" data-track-index="20" style="--clip-duration:3s;--clip-delay:0s;font-size:48px">这个视频开头所有的剪辑和动画效果，都是 AI 完成的</p>
-      <p id="subtitle-02" class="clip subtitle" data-start="3" data-duration="3" data-track-index="21" style="--clip-duration:3s;--clip-delay:3s;font-size:48px">我只需要给它原始素材，再用自然语言告诉它需求</p>
-      <p id="subtitle-03" class="clip subtitle" data-start="6" data-duration="3" data-track-index="22" style="--clip-duration:3s;--clip-delay:6s;font-size:48px">这一期我们就实操看看，AI 后期到底怎么做</p>
-      <p id="subtitle-04" class="clip subtitle" data-start="9" data-duration="3" data-track-index="23" style="--clip-duration:3s;--clip-delay:9s;font-size:48px">最关键的是，一定要给它带时间戳的字幕</p>
-      <p id="subtitle-05" class="clip subtitle" data-start="12" data-duration="3" data-track-index="20" style="--clip-duration:3s;--clip-delay:12s;font-size:48px">这样它才能知道什么时候该加什么效果</p>
+      <p id="subtitle-01" class="clip subtitle" data-start="0" data-duration="3" data-track-index="20" style="--clip-duration:3s;--clip-delay:0s;font-size:48px;left:230px;top:842px;width:1459px;min-height:173px;">这个视频开头所有的剪辑和动画效果，都是 AI 完成的</p>
+      <p id="subtitle-02" class="clip subtitle" data-start="3" data-duration="3" data-track-index="21" style="--clip-duration:3s;--clip-delay:3s;font-size:48px;left:230px;top:842px;width:1459px;min-height:173px;">我只需要给它原始素材，再用自然语言告诉它需求</p>
+      <p id="subtitle-03" class="clip subtitle" data-start="6" data-duration="3" data-track-index="22" style="--clip-duration:3s;--clip-delay:6s;font-size:48px;left:230px;top:842px;width:1459px;min-height:173px;">这一期我们就实操看看，AI 后期到底怎么做</p>
+      <p id="subtitle-04" class="clip subtitle" data-start="9" data-duration="3" data-track-index="23" style="--clip-duration:3s;--clip-delay:9s;font-size:48px;left:230px;top:842px;width:1459px;min-height:173px;">最关键的是，一定要给它带时间戳的字幕</p>
+      <p id="subtitle-05" class="clip subtitle" data-start="12" data-duration="3" data-track-index="20" style="--clip-duration:3s;--clip-delay:12s;font-size:48px;left:230px;top:842px;width:1459px;min-height:173px;">这样它才能知道什么时候该加什么效果</p>
     </section>
     <div id="timebar" class="clip timebar" data-start="0" data-duration="15" data-track-index="30"></div>
   </main>
