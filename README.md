@@ -134,6 +134,91 @@ npm run render
 output/version-001.mp4
 ```
 
+
+## 真实素材一键构建
+
+这一节是给不熟悉命令行的用户看的。只要文件放对位置，就不需要手动设置 `$env:EDIT_MODE="real"`。
+
+### 1. 放入主视频
+
+请把视频放到：
+
+```text
+assets/raw/main.mp4
+```
+
+注意：
+
+- `main.mp4` 必须是一个视频文件，不是文件夹。
+- 不要命名成 `main.mp4.mp4`。如果 Windows 隐藏了扩展名，请先打开资源管理器里的“文件扩展名”显示。
+
+### 2. 放入字幕
+
+请把字幕放到：
+
+```text
+captions/main.srt
+```
+
+注意：
+
+- `main.srt` 必须是一个 SRT 文件，不是文件夹。
+- Windows 用户用记事本保存字幕时，文件名请写成 `"main.srt"`，保存类型选择“所有文件”，编码选择 UTF-8。
+- 不要保存成 `main.srt.txt`。
+
+### 3. 一键构建真实视频
+
+运行：
+
+```bash
+npm run build:real
+```
+
+成功时你应该看到类似日志：
+
+```text
+[build:real] 1/5 probe
+✓ probe completed
+[build:real] 2/5 parse
+✓ parse completed
+[build:real] 3/5 plan
+✓ plan completed
+[build:real] 4/5 compose
+✓ compose completed
+[build:real] 5/5 validate
+✓ validate completed
+[build:real] post-build check
+✓ current.html contains <video id="main-video"> and no demo placeholder
+```
+
+`build:real` 结束前会做 post-build 校验：
+
+- `compositions/current.html` 必须存在。
+- `current.html` 必须包含真实视频 `<video id="main-video">`。
+- `current.html` 不应该再出现“主视频占位区域”。
+- `metadata/video-metadata.json`、`captions/parsed-captions.json`、`captions/edit-plan.json` 必须存在。
+- duration 必须来自真实视频 metadata 或真实字幕，不应该误用 demo 的固定 15 秒，除非真实视频本身就是 15 秒。
+
+如果 `build:real` 显示成功但预览还是占位画面，说明构建没有真正切到真实素材；现在 post-build 校验会直接报错，请先按报错修复，不要继续 render。
+
+### 4. 预览
+
+```bash
+npm run preview
+```
+
+### 5. 导出
+
+```bash
+npm run render:real
+```
+
+`npm run render:real` 会先执行真实素材构建，再执行导出，最终文件在：
+
+```text
+output/version-001.mp4
+```
+
 ## 新增命令
 
 - `npm run parse`：按当前模式解析 SRT。

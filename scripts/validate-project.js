@@ -43,6 +43,24 @@ function validateTimedElements(html) {
   return warnings;
 }
 
+async function validateRequiredFile(filePath, { realAsset = false } = {}) {
+  if (await exists(filePath)) {
+    const fileStat = await stat(filePath);
+    if (fileStat.isFile()) return { ok: true, message: `✓ 文件存在：${filePath}` };
+    return { ok: false, message: `✗ ${filePath} 必须是文件，不能是文件夹。` };
+  }
+
+  if (realAsset && filePath === 'assets/raw/main.mp4' && await exists('assets/raw/main.mp4.mp4')) {
+    return { ok: false, message: '✗ 未找到 assets/raw/main.mp4，但发现 assets/raw/main.mp4.mp4。请把视频重命名为 main.mp4。' };
+  }
+
+  if (realAsset && filePath === 'captions/main.srt' && await exists('captions/main.srt.txt')) {
+    return { ok: false, message: '✗ 未找到 captions/main.srt，但发现 captions/main.srt.txt。请在记事本中另存为 "main.srt"，保存类型选择“所有文件”。' };
+  }
+
+  return { ok: false, message: `✗ 缺少文件：${filePath}` };
+}
+
 async function main() {
   let errors = 0;
   let warnings = 0;
@@ -57,9 +75,21 @@ async function main() {
   if (config.mode === 'real') requiredFiles.push(config.rawVideoPath, config.videoMetadataPath);
 
   for (const file of [...new Set(requiredFiles)]) {
-    if (await exists(file) && (await stat(file)).isFile()) console.log(`✓ 文件存在：${file}`);
-    else if (config.mode === 'demo' && file === config.rawVideoPath) { console.warn(`⚠ demo 模式未找到真实视频素材：${file}（不影响 demo）`); warnings += 1; }
-    else { console.error(`✗ 缺少文件：${file}`); errors += 1; }
+    const isRealAsset = config.mode === 'real' && [config.rawVideoPath, config.captionPath].includes(file);
+    const result = await validateRequiredFile(file, { realAsset: isRealAsset });
+    if (result.ok) console.log(result.message);
+    else { console.error(result.message); errors += 1; }
+  }
+
+  if (config.mode === 'demo') {
+    if (await exists(config.rawVideoPath)) {
+      const rawVideoStat = await stat(config.rawVideoPath);
+      if (rawVideoStat.isFile()) console.log(`✓ 已找到真实视频素材：${config.rawVideoPath}`);
+      else { console.warn(`⚠ ${config.rawVideoPath} 不是文件；demo 会继续使用内置占位画面。`); warnings += 1; }
+    } else {
+      console.warn(`⚠ 未找到 ${config.rawVideoPath}，demo 将使用 composition 内置占位画面。`);
+      warnings += 1;
+    }
   }
 
   const nodeMajor = Number.parseInt(process.versions.node.split('.')[0], 10);
@@ -74,11 +104,6 @@ async function main() {
   if (ffprobe.ok) console.log(`✓ FFprobe 可用：${ffprobe.output}`);
   else if (config.mode === 'real') { console.error(`✗ real 模式需要 FFprobe：${ffprobe.output}`); errors += 1; }
   else { console.warn(`⚠ FFprobe 不可用：${ffprobe.output}`); warnings += 1; }
-
-  if (config.mode === 'demo') {
-    if (await exists(config.rawVideoPath)) console.log(`✓ 已找到真实视频素材：${config.rawVideoPath}`);
-    else { console.warn(`⚠ 未找到 ${config.rawVideoPath}，demo 将使用 composition 内置占位画面。`); warnings += 1; }
-  }
 
   const compositionHtml = await readFile('compositions/current.html', 'utf8');
   const timedWarnings = validateTimedElements(compositionHtml);
