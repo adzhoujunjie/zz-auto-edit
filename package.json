@@ -15,7 +15,8 @@
     "probe": "node scripts/probe-video.js",
     "compose": "node scripts/generate-composition.js",
     "build:real": "node scripts/run-build.js real",
-    "render:real": "node scripts/render-real.js"
+    "render:real": "npm run build:real && npm run render && npm run assert:render",
+    "assert:render": "node scripts/assert-render-output.js"
   },
   "engines": {
     "node": ">=22"

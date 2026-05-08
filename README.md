@@ -213,21 +213,32 @@ npm run preview
 npm run render:real
 ```
 
-`npm run render:real` 会先执行真实素材构建，再直接调用 HyperFrames render 导出，最终文件在：
+`npm run render:real` 会串联三个已经验证过的命令：
+
+```bash
+npm run build:real
+npm run render
+npm run assert:render
+```
+
+也就是说，它会先重新构建真实素材 composition，再使用普通 `npm run render` 导出，最后检查导出文件是否存在且文件大小大于 0。最终文件在：
 
 ```text
 output/version-001.mp4
 ```
 
-`render:real` 成功后还会检查 `output/version-001.mp4` 是否存在且文件大小大于 0。
-
-如果 `npm run render:real` 失败，但 `npm run build:real` 已经成功，可以临时手动执行：
+如果 `npm run render:real` 失败，请先分别执行下面两个命令定位问题：
 
 ```bash
+npm run build:real
 npm run render
 ```
 
-不过最终推荐仍然使用：
+- 如果 `npm run build:real` 失败，说明是真实素材、字幕、ffprobe 或 composition 构建问题。
+- 如果 `npm run build:real` 成功但 `npm run render` 失败，说明是 HyperFrames 导出环境问题。
+- 如果前两步都成功但 `npm run assert:render` 失败，请检查 `output/version-001.mp4` 是否被占用、被删除，或文件大小是否为 0。
+
+最终推荐仍然使用：
 
 ```bash
 npm run render:real
@@ -243,7 +254,8 @@ npm run render:real
 - `npm run build:real`：检查真实素材、probe video、parse real srt、build edit plan、生成 composition、validate。
 - `npm run preview`：预览 current composition。
 - `npm run render`：导出 `output/version-001.mp4`。
-- `npm run render:real`：一键基于真实素材构建并导出。
+- `npm run assert:render`：检查 `output/version-001.mp4` 是否存在且文件大小大于 0。
+- `npm run render:real`：一键串联 `build:real`、`render`、`assert:render`，基于真实素材构建并导出。
 
 ## 已修复的 HyperFrames warning
 
