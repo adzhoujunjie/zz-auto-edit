@@ -2,6 +2,7 @@ import { readFile, stat } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import { access } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { loadConfig, readJson } from './config-utils.js';
 
 const STEP_SCRIPTS = {
@@ -12,18 +13,11 @@ const STEP_SCRIPTS = {
   validate: 'scripts/validate-project.js'
 };
 
-const mode = process.argv[2] || 'demo';
-const shouldRender = process.argv.includes('--render');
-
-if (!['demo', 'real'].includes(mode)) {
-  console.error('✗ 构建模式必须是 demo 或 real。');
-  process.exit(1);
+function stepsForMode(mode) {
+  return mode === 'real'
+    ? ['probe', 'parse', 'plan', 'compose', 'validate']
+    : ['parse', 'plan', 'compose', 'validate'];
 }
-
-const buildName = `build:${mode}`;
-const steps = mode === 'real'
-  ? ['probe', 'parse', 'plan', 'compose', 'validate']
-  : ['parse', 'plan', 'compose', 'validate'];
 
 async function exists(filePath) {
   try {
@@ -34,8 +28,16 @@ async function exists(filePath) {
   }
 }
 
-function runNodeStep(step, index, total) {
+function createStepError(step, message, status = 1) {
+  const error = new Error(message);
+  error.step = step;
+  error.status = status || 1;
+  return error;
+}
+
+function runNodeStep(mode, step, index, total) {
   const scriptPath = STEP_SCRIPTS[step];
+  const buildName = `build:${mode}`;
   console.log(`\n[${buildName}] ${index + 1}/${total} ${step}`);
 
   const result = spawnSync(process.execPath, [scriptPath], {
@@ -46,37 +48,15 @@ function runNodeStep(step, index, total) {
 
   if (result.error) {
     console.error(`✗ ${step} failed: ${result.error.message}`);
-    process.exit(result.status ?? 1);
+    throw createStepError(step, result.error.message, result.status ?? 1);
   }
 
   if (result.status !== 0) {
     console.error(`✗ ${step} failed`);
-    process.exit(result.status ?? 1);
+    throw createStepError(step, `${step} failed`, result.status ?? 1);
   }
 
   console.log(`✓ ${step} completed`);
-}
-
-function runNpmRender() {
-  const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-  console.log(`\n[render:real] render`);
-  const result = spawnSync(npmCommand, ['run', 'render'], {
-    stdio: 'inherit',
-    env: { ...process.env, EDIT_MODE: mode },
-    shell: false
-  });
-
-  if (result.error) {
-    console.error(`✗ render failed: ${result.error.message}`);
-    process.exit(result.status ?? 1);
-  }
-
-  if (result.status !== 0) {
-    console.error('✗ render failed');
-    process.exit(result.status ?? 1);
-  }
-
-  console.log('✓ render completed');
 }
 
 function extractDurations(html) {
@@ -95,7 +75,7 @@ async function assertFile(filePath, message) {
   if (!fileStat.isFile()) throw new Error(`${message}（当前路径不是文件）`);
 }
 
-async function assertBuildOutput() {
+export async function assertBuildOutput(mode) {
   const config = await loadConfig();
   const currentPath = 'compositions/current.html';
   await assertFile(currentPath, `${currentPath} 不存在，请检查 compose 步骤。`);
@@ -146,24 +126,33 @@ async function assertBuildOutput() {
   console.log('✓ current.html contains <video id="main-video"> and no demo placeholder');
 }
 
-async function main() {
-  console.log(`[${buildName}] starting with EDIT_MODE=${mode}`);
-  for (const [index, step] of steps.entries()) runNodeStep(step, index, steps.length);
-
-  console.log(`\n[${buildName}] post-build check`);
-  try {
-    await assertBuildOutput();
-  } catch (error) {
-    console.error(`✗ ${mode} build failed: ${error.message}`);
-    process.exit(1);
+export async function runBuild(mode = 'demo') {
+  if (!['demo', 'real'].includes(mode)) {
+    throw createStepError('mode', '构建模式必须是 demo 或 real。', 1);
   }
 
-  console.log(`[${buildName}] completed successfully`);
+  const buildName = `build:${mode}`;
+  const steps = stepsForMode(mode);
+  console.log(`[${buildName}] starting with EDIT_MODE=${mode}`);
 
-  if (shouldRender) runNpmRender();
+  for (const [index, step] of steps.entries()) runNodeStep(mode, step, index, steps.length);
+
+  console.log(`\n[${buildName}] post-build check`);
+  await assertBuildOutput(mode);
+  console.log(`[${buildName}] completed successfully`);
 }
 
-main().catch((error) => {
-  console.error(`✗ ${mode} build failed: ${error.message}`);
-  process.exit(1);
-});
+async function main() {
+  const mode = process.argv[2] || 'demo';
+  try {
+    await runBuild(mode);
+  } catch (error) {
+    if (error.step === 'mode') console.error(`✗ ${error.message}`);
+    else console.error(`✗ ${mode} build failed: ${error.message}`);
+    process.exit(error.status || 1);
+  }
+}
+
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+  main();
+}

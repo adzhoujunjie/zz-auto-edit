@@ -213,10 +213,24 @@ npm run preview
 npm run render:real
 ```
 
-`npm run render:real` 会先执行真实素材构建，再执行导出，最终文件在：
+`npm run render:real` 会先执行真实素材构建，再直接调用 HyperFrames render 导出，最终文件在：
 
 ```text
 output/version-001.mp4
+```
+
+`render:real` 成功后还会检查 `output/version-001.mp4` 是否存在且文件大小大于 0。
+
+如果 `npm run render:real` 失败，但 `npm run build:real` 已经成功，可以临时手动执行：
+
+```bash
+npm run render
+```
+
+不过最终推荐仍然使用：
+
+```bash
+npm run render:real
 ```
 
 ## 新增命令
