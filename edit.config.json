@@ -1,0 +1,26 @@
+{
+  "videoTitle": "AI 自动剪辑开头 Demo",
+  "aspectRatio": "16:9",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "duration": 15,
+  "rawVideoPath": "assets/raw/main.mp4",
+  "captionPath": "captions/sample.srt",
+  "parsedCaptionPath": "captions/parsed-captions.json",
+  "outputName": "version-001.mp4",
+  "language": "zh-CN",
+  "stylePreset": "high-quality-douyin-hook",
+  "safeArea": {
+    "personRegion": { "x": 0.32, "y": 0.08, "width": 0.36, "height": 0.82 },
+    "subtitleRegion": { "x": 0.12, "y": 0.78, "width": 0.76, "height": 0.16 },
+    "titleRegion": { "x": 0.08, "y": 0.08, "width": 0.84, "height": 0.20 }
+  },
+  "rules": {
+    "avoidCoveringPerson": true,
+    "subtitleMaxLines": 2,
+    "subtitleLanguage": "zh-CN",
+    "avoidOverZoom": true,
+    "maxScale": 1.08
+  }
+}

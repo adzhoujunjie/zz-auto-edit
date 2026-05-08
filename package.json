@@ -1,0 +1,18 @@
+{
+  "name": "zz-auto-edit",
+  "version": "0.1.0",
+  "private": true,
+  "description": "基于 HyperFrames 的自动剪辑 MVP：字幕解析、剪辑计划、HTML composition、预览与导出骨架。",
+  "type": "module",
+  "scripts": {
+    "parse": "node scripts/parse-srt.js",
+    "plan": "node scripts/build-edit-plan.js",
+    "validate": "node scripts/validate-project.js",
+    "build:demo": "npm run parse && npm run plan && npm run validate",
+    "preview": "npx hyperframes preview . --port 3002",
+    "render": "npx hyperframes render -c compositions/current.html -o output/version-001.mp4 --fps 30 --quality standard",
+    "version:new": "node scripts/create-version.js"
+  },
+  "engines": { "node": ">=22" },
+  "devDependencies": {}
+}
