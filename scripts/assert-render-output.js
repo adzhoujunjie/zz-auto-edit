@@ -2,11 +2,15 @@ import { stat } from 'node:fs/promises';
 import path from 'node:path';
 import { loadConfig } from './config-utils.js';
 
+function normalizeDisplayPath(outputPath) {
+  return outputPath.replaceAll(path.sep, '/');
+}
+
 async function assertRenderOutput() {
   const config = await loadConfig();
-  const outputName = config.outputName || 'version-001.mp4';
-  const displayPath = path.posix.join('output', outputName);
-  const outputPath = path.join('output', outputName);
+  const requestedPath = process.argv[2];
+  const outputPath = requestedPath || path.join('output', config.outputName || 'version-001.mp4');
+  const displayPath = normalizeDisplayPath(outputPath);
 
   let outputStat;
   try {
@@ -24,10 +28,10 @@ async function assertRenderOutput() {
   }
 
   console.log(`✓ render output exists: ${displayPath}`);
-  console.log('✓ render:real completed');
+  console.log(`✓ render assertion completed for ${displayPath}`);
 }
 
 assertRenderOutput().catch((error) => {
-  console.error(`✗ render:real failed: ${error.message}`);
+  console.error(`✗ render assertion failed: ${error.message}`);
   process.exit(1);
 });

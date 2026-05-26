@@ -1,0 +1,59 @@
+{
+  "source": "prompts/feedback.md",
+  "targetVersion": "version-002",
+  "items": [
+    {
+      "id": "feedback-001",
+      "timeRange": {
+        "start": 3,
+        "end": 5
+      },
+      "target": "camera",
+      "action": "zoom_out",
+      "intensity": "low",
+      "rawText": "0:03-0:05 镜头拉远一点，人物不要太满。"
+    },
+    {
+      "id": "feedback-002",
+      "timeRange": {
+        "start": 5,
+        "end": 7
+      },
+      "target": "callout",
+      "action": "move_top_left",
+      "intensity": "medium",
+      "rawText": "0:05-0:07 大字往左上移动，避免挡住人物。"
+    },
+    {
+      "id": "feedback-003",
+      "timeRange": {
+        "start": 6,
+        "end": 9
+      },
+      "target": "subtitle",
+      "action": "increase_size",
+      "intensity": "low",
+      "rawText": "0:06-0:09 字幕字号加大一点。"
+    },
+    {
+      "id": "feedback-004",
+      "timeRange": {
+        "start": 7,
+        "end": 9
+      },
+      "target": "overlay",
+      "action": "reduce_or_remove",
+      "intensity": "medium",
+      "rawText": "0:07-0:09 减少装饰元素，让画面更干净。"
+    },
+    {
+      "id": "feedback-005",
+      "timeRange": null,
+      "target": "global",
+      "action": "increase_brightness",
+      "intensity": "low",
+      "rawText": "全片画面稍微提亮一点。"
+    }
+  ],
+  "unresolvedItems": []
+}
