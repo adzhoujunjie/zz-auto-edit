@@ -2,7 +2,7 @@ import { access, stat, readFile } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { getCaptionPath, loadConfig } from './config-utils.js';
+import { getCaptionPath, loadConfig, readJson } from './config-utils.js';
 
 const execFileAsync = promisify(execFile);
 const baseRequiredFiles = [
@@ -25,6 +25,15 @@ async function commandVersion(command, args) {
     return { ok: true, output: `${stdout}${stderr}`.trim().split('\n').slice(0, 2).join(' ') };
   } catch (error) {
     return { ok: false, output: error.message };
+  }
+}
+
+async function hasUsableVideoMetadata(filePath) {
+  try {
+    const metadata = await readJson(filePath);
+    return Boolean(metadata.duration && metadata.width && metadata.height);
+  } catch {
+    return false;
   }
 }
 
@@ -102,7 +111,11 @@ async function main() {
 
   const ffprobe = await commandVersion('ffprobe', ['-version']);
   if (ffprobe.ok) console.log(`✓ FFprobe 可用：${ffprobe.output}`);
-  else if (config.mode === 'real') { console.error(`✗ real 模式需要 FFprobe：${ffprobe.output}`); errors += 1; }
+  else if (config.mode === 'real' && await hasUsableVideoMetadata(config.videoMetadataPath)) {
+    console.warn(`⚠ FFprobe 不可用，已使用可用的视频 metadata 继续：${ffprobe.output}`);
+    warnings += 1;
+  }
+  else if (config.mode === 'real') { console.error(`✗ real 模式需要 FFprobe 或可用的视频 metadata：${ffprobe.output}`); errors += 1; }
   else { console.warn(`⚠ FFprobe 不可用：${ffprobe.output}`); warnings += 1; }
 
   const compositionHtml = await readFile('compositions/current.html', 'utf8');

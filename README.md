@@ -341,6 +341,8 @@ npm run render:feedback
 output/version-002.mp4
 ```
 
+成功标准只有一个：`output/version-002.mp4` 必须存在，并且文件大小必须大于 0。`npm run render:feedback` 末尾会自动执行 `npm run assert:feedback-render` 做这件事；如果文件不存在或是 0 字节，会失败退出。
+
 ### 常见问题
 
 #### 时间格式写错
@@ -377,6 +379,14 @@ npm run assert:feedback-render
 - 如果 render 命令失败，优先检查 HyperFrames、FFmpeg 和本机导出环境。
 - 如果只有 `assert:feedback-render` 失败，请检查 `output/version-002.mp4` 是否存在、是否被占用、文件大小是否为 0。
 
+Windows 下可以继续用下面的命令确认最终输出：
+
+```powershell
+Get-ChildItem output | Select Name,Length,LastWriteTime
+```
+
+只有看到 `version-002.mp4` 且 `Length` 大于 0，才算反馈版导出成功。
+
 ### Windows 本地最终验收命令
 
 ```powershell
@@ -386,13 +396,14 @@ npm run feedback:parse
 npm run build:feedback
 npm run preview
 npm run render:feedback
+Get-ChildItem output | Select Name,Length,LastWriteTime
 ```
 
 
 ## 新增命令
 
 - `npm run parse`：按当前模式解析 SRT。
-- `npm run probe`：real 模式下用 ffprobe 读取 `main.mp4` 的 `duration`、`width`、`height`、`fps`、`hasAudio`，写入 `metadata/video-metadata.json`。
+- `npm run probe`：real 模式下优先用 ffprobe 读取 `main.mp4` 的 `duration`、`width`、`height`、`fps`、`hasAudio`；如果本机 ffprobe 入口不可执行，会从 MP4 文件结构读取基础元数据并写入 `metadata/video-metadata.json`。
 - `npm run plan`：根据解析后的字幕生成 subtitles、callouts、cameraMoves、overlays。
 - `npm run compose`：根据 config 和 edit plan 生成 HyperFrames HTML composition。
 - `npm run build:demo`：demo 模式完整构建和校验。
@@ -425,7 +436,7 @@ composition 现在在脚本中注册：
 window.__timelines["zz-auto-edit-version-001"] = tl;
 ```
 
-如果运行环境已经提供 `window.gsap`，会注册 paused GSAP timeline；如果没有，也会注册有限 duration 的兼容 timeline，保证 StaticGuard 能看到 composition timeline。
+这里注册的是轻量兼容 timeline，不依赖外部 GSAP 脚本，保证 StaticGuard 能看到 composition timeline。
 
 ### 字体 warning
 
@@ -459,11 +470,16 @@ system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei UI", 
 
 现象：`npm run probe` 或 `npm run build:real` 提示 ffprobe 执行失败。
 
-解决：安装 FFmpeg，并确认：
+处理方式：
+
+- 推荐安装 FFmpeg，并确认：
 
 ```bash
 ffprobe -version
 ```
+
+- 如果本机有 `ffprobe.exe` 入口但不可执行，`npm run build:real` 会尝试从 MP4 文件结构读取基础元数据继续构建。
+- 这个兜底只负责 `build:real` 所需的时长和画面尺寸；`render:real` / `render:feedback` 仍需要 HyperFrames 和它依赖的本机导出环境可用。
 
 ### 字幕时间轴解析失败
 

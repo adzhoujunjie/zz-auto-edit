@@ -120,8 +120,9 @@ export function buildHtml({ config, plan, basePrefix, version = 'version-001' })
   const title = `${config.videoTitle} - ${version}`;
   const videoSource = assetPath(basePrefix, config.rawVideoPath);
   const realVideo = config.mode === 'real' || plan.meta?.mode === 'real';
+  const videoAudioAttr = plan.meta?.videoMetadata?.hasAudio ? 'data-has-audio="true"' : 'muted';
   const media = realVideo
-    ? `<video id="main-video" data-start="0" data-duration="${durationSeconds}" data-track-index="1" data-media-start="0" data-volume="1" src="${attr(videoSource)}" preload="auto" playsinline></video>`
+    ? `<video id="main-video" data-start="0" data-duration="${durationSeconds}" data-track-index="1" data-media-start="0" data-volume="1" ${videoAudioAttr} src="${attr(videoSource)}" preload="auto" playsinline></video>`
     : `<div class="grid"></div><div class="person-safe"></div><div class="avatar"></div><div class="placeholder-label">主视频占位区域 / assets/raw/main.mp4</div>`;
   const mediaLabel = realVideo ? '真实主视频' : '主视频占位区域';
   const filter = visualFilter(plan);
@@ -164,7 +165,7 @@ export function buildHtml({ config, plan, basePrefix, version = 'version-001' })
 </head>
 <body>
   <main id="stage" class="composition-root clip" data-composition-id="${compositionId}" data-start="0" data-width="${config.width}" data-height="${config.height}">
-    <section id="media-layer" class="clip video-plate" data-start="0" data-duration="${durationSeconds}" data-track-index="0" aria-label="${mediaLabel}">
+    <section id="media-layer" class="video-plate" aria-label="${mediaLabel}">
       ${media}
     </section>
     <div id="brand" class="clip brand" data-start="0" data-duration="${durationSeconds}" data-track-index="2">ZZ AUTO EDIT</div>
@@ -183,20 +184,14 @@ export function buildHtml({ config, plan, basePrefix, version = 'version-001' })
     window.__timelines = window.__timelines || {};
     const durationSeconds = ${JSON.stringify(durationSeconds)};
     const timelineKey = ${JSON.stringify(compositionId)};
-    if (window.gsap) {
-      const tl = window.gsap.timeline({ paused: true });
-      tl.to({}, { duration: durationSeconds });
-      window.__timelines[timelineKey] = tl;
-    } else {
-      window.__timelines[timelineKey] = {
-        duration: () => durationSeconds,
-        pause: () => window.__timelines[timelineKey],
-        paused: () => true,
-        seek: () => window.__timelines[timelineKey],
-        time: () => window.__timelines[timelineKey],
-        progress: () => window.__timelines[timelineKey]
-      };
-    }
+    window.__timelines[timelineKey] = {
+      duration: () => durationSeconds,
+      pause: () => window.__timelines[timelineKey],
+      paused: () => true,
+      seek: () => window.__timelines[timelineKey],
+      time: () => window.__timelines[timelineKey],
+      progress: () => window.__timelines[timelineKey]
+    };
   </script>
 </body>
 </html>
