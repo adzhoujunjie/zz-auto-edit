@@ -9,8 +9,8 @@
     "plan": "node scripts/build-edit-plan.js",
     "validate": "node scripts/validate-project.js",
     "build:demo": "node scripts/run-build.js demo",
-    "preview": "npx hyperframes preview . --port 3002",
-    "render": "npx hyperframes render -c compositions/current.html -o output/version-001.mp4 --fps 30 --quality standard",
+    "preview": "hyperframes preview . --port 3002",
+    "render": "hyperframes render -c compositions/current.html -o output/version-001.mp4 --fps 30 --quality standard",
     "version:new": "node scripts/create-version.js",
     "probe": "node scripts/probe-video.js",
     "compose": "node scripts/generate-composition.js",
@@ -20,11 +20,14 @@
     "feedback:parse": "node scripts/parse-feedback.js",
     "feedback:apply": "node scripts/apply-feedback.js",
     "build:feedback": "npm run build:real && npm run feedback:parse && npm run feedback:apply",
-    "render:feedback": "npm run build:feedback && npx hyperframes render -c compositions/current.html -o output/version-002.mp4 --fps 30 --quality standard && npm run assert:feedback-render",
+    "render:feedback:file": "hyperframes render -c compositions/current.html -o output/version-002.mp4 --fps 30 --quality standard",
+    "render:feedback": "npm run build:feedback && npm run render:feedback:file && npm run assert:feedback-render",
     "assert:feedback-render": "node scripts/assert-render-output.js output/version-002.mp4"
   },
   "engines": {
     "node": ">=22"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "hyperframes": "0.6.46"
+  }
 }
