@@ -12,6 +12,13 @@ assets/images/*
 !assets/images/.gitkeep
 output/*
 !output/.gitkeep
+metadata/*
+!metadata/.gitkeep
+captions/main.srt
+captions/edit-plan.version-*.json
+compositions/version-002.html
+changelog/version-002.md
+edit-notes/version-002.md
 *.mp4
 *.mov
 *.mkv

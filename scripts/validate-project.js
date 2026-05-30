@@ -125,7 +125,14 @@ async function main() {
     for (const warning of timedWarnings) console.warn(`⚠ ${warning}`);
     warnings += timedWarnings.length;
   }
-  if (compositionHtml.includes('window.__timelines') && compositionHtml.includes('zz-auto-edit-version-001')) console.log('✓ composition 已注册 window.__timelines。');
+  const compositionIdMatch = compositionHtml.match(/\bdata-composition-id=["']([^"']+)["']/);
+  const compositionId = compositionIdMatch?.[1];
+  const hasTimelineRegistration = Boolean(
+    compositionId &&
+    compositionHtml.includes('window.__timelines') &&
+    compositionHtml.includes(compositionId)
+  );
+  if (hasTimelineRegistration) console.log('✓ composition 已注册 window.__timelines。');
   else { console.error('✗ composition 缺少 window.__timelines 注册。'); errors += 1; }
 
   if (errors > 0) {

@@ -13,7 +13,7 @@
 
 - Node.js `>=22`
 - FFmpeg / ffprobe：real 模式探测视频和 render 导出需要
-- 可访问 HyperFrames CLI 的 npm 环境：`preview` / `render` 会通过 `npx hyperframes ...` 执行
+- 可访问 npm registry 的环境：首次 `npm install` 会安装固定版本的 HyperFrames CLI；安装成功后 `preview` / `render` 会优先使用本地 `node_modules/.bin/hyperframes`，不依赖每次临时拉取。
 
 检查命令：
 
@@ -67,6 +67,30 @@ npm run render
 ```text
 output/version-001.mp4
 ```
+
+## 受限网络环境说明
+
+本项目已把 HyperFrames CLI 固定在 `devDependencies` 中。首次运行前需要联网执行：
+
+```bash
+npm install
+```
+
+安装成功后，`npm run preview`、`npm run render`、`npm run render:real` 和 `npm run render:feedback` 会使用本地已安装的 `hyperframes` 命令，不应再通过 `npx` 每次临时联网拉取。
+
+如果 render 仍然失败，请先分步排查：
+
+```bash
+npm install
+npm run build:real
+npm run render
+npm run assert:render
+npm run build:feedback
+npm run render:feedback:file
+npm run assert:feedback-render
+```
+
+如果 `npm install` 阶段无法联网安装依赖，请先处理本机 npm registry、代理或网络权限；如果安装已成功但 render 失败，再检查 HyperFrames、FFmpeg、素材路径和 composition 输出。
 
 ## 真实素材接入
 
@@ -371,7 +395,7 @@ output/version-002.mp4
 
 ```bash
 npm run build:feedback
-npx hyperframes render -c compositions/current.html -o output/version-002.mp4 --fps 30 --quality standard
+npm run render:feedback:file
 npm run assert:feedback-render
 ```
 
@@ -504,7 +528,7 @@ real 模式主视频默认使用 `object-fit: contain`，优先避免人物被�
 优先检查：
 
 1. `ffmpeg -version` 是否可用。
-2. npm 是否能拉取 HyperFrames CLI。
+2. 是否已经成功执行 `npm install` 并安装本地 HyperFrames CLI。
 3. 是否能先跑通 `npm run build:demo` 或 `npm run build:real`。
 4. `compositions/current.html` 是否存在。
 5. 真实素材是否被放在 `.gitignore` 指定的本地路径，而不是误提交到 Git。
